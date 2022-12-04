@@ -18,61 +18,75 @@
 
     <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
     <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
-    <!-- <py-env>
-        - altair
-        - vega_datasets
+    <py-env>
         - numpy
         - pandas
         - panel==0.13.1a2
         - paths:
-            - /chart.py
-    </py-env> -->
+            - ./main.py
+    </py-env>
+    
 </head>
 
 <body>
     <div class="container-fluid d-flex flex-column vh-100 overflow-hidden" id="container">
         <nav class="navbar navbar-expand-md navbar-dark sticky-top shadow" id="header"
-            style="background-color: #0f54ea;">
+            style="background-color: #0e21215e;">
             <div class="app-header">
-                <a class="title" href="" style="color: #f7f6f3;">PyScript - Python in the Browser</a>
+                <a class="title" href="" style="color: #f7f6f3; font-family:'Courier New', Courier, monospace;">📈 pivotable</a>
             </div>
         </nav>
 
         <div class="row overflow-hidden" id="content">
             <div class="col mh-100 float-left" id="main">
-                <div id="search"></div>
-                <div id="chart"></div>
+                <div id="fileinput"></div>
+                
+                <div id="questions"></div>
                 <div id="table"></div>
             </div>
         </div>
     </div>
-    <!-- <py-script>
-import asyncio
-import panel as pn
-import altair as alt
-from vega_datasets import data
-from panel.io.pyodide import show
-from chart import get_chart
+    <py-script>
+        from main import *
+        import asyncio
+        import panel as pn
+        import pandas as pd
+        from panel.io.pyodide import show
 
-horse_power = pn.widgets.IntInput(value=230, step=1, start=0, end=230)
-search = pn.Column('# Filter by Horsepower', horse_power, background='White')
+        file_input = pn.widgets.FileInput(accept='.csv', width=180)
+        button_upload = pn.widgets.Button(name='Upload', button_type='primary', width=100)
+        row = pn.Row(file_input, button_upload, height=75)
+        
+        table = pn.widgets.Tabulator(pagination='remote', page_size=10)
+        document.getElementById('table').style.display = 'none'
+        values_column = pn.widgets.Select(name='count number of', options=[])
+        columns_column = pn.widgets.Select(name='per', options=[])
+        def process_file(event):
+            if file_input.value is not None:
+                mytable = Table(io.BytesIO(file_input.value))
+                #df = pd.read_csv()
+                #table.value = df
+                #document.getElementById('table').style.display = 'block'
+                values_column.options=list(mytable.most_unique.index)
+                columns_column.options=list(mytable.least_unique.index)
+                table.value = mytable.dataframe.pivot_table(values=values_column.value,
+                                                            index=columns_column.value,
+                                                            aggfunc='count')
+                document.getElementById('table').style.display = 'block'
+        
 
-cars = data.cars()
-table = pn.widgets.Tabulator(pagination='remote', page_size=10)
-table.value = cars
+            
+        button_upload.on_click(process_file)
+        print('--------')
+        values_column.param.watch(process_file, 'value')
+        columns_column.param.watch(process_file, 'value')
+        file_input.param.watch(process_file, 'value')
 
-chart = pn.pane.Vega()
-chart.object = get_chart(cars)
-
-@pn.depends(horse_power, watch=True)
-def update_ui(*events):
-    chart.object = get_chart(cars[cars['Horsepower'] < horse_power.value])
-    table.value = cars[cars['Horsepower'] < horse_power.value]
-
-await show(search, 'search')
-await show(chart, 'chart')
-await show(table, 'table')
-    </py-script> -->
+        row2 = pn.Row(values_column, columns_column, height=75)
+        await show(row, 'fileinput')
+        await show(table, 'table')
+        await show(row2, 'questions')
+    </py-script>
 </body>
 
 </html>
