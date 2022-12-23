@@ -25,7 +25,7 @@ class Table():
     
     # convert possible date columns
     self.convert_possible_date_columns()
-    self.observe_redundant_datetime_columns()
+    # self.observe_redundant_datetime_columns()
 
     # prepare the dataframe metadata; data types, uniqueness, and null values
     self.prepare_dataframe_metadata()
@@ -137,9 +137,9 @@ class Table():
                                           ordered=True)
     # get most unique
     self.most_unique = self.metadata.sort_values(['# Unique', 'Type'], ascending = [False, True])
-    log(f"{self.most_unique.loc[0,'# Non-null']} == {len(self.dataframe)} {self.most_unique.loc[0,'# Non-null'] == len(self.dataframe)}")
-    if self.most_unique.loc[0,'# Non-null'] == len(self.dataframe):
-      self.most_unique = self.most_unique[[self.most_unique.index[0]]]
+    # log(f"{self.most_unique.loc[0,'# Non-null']} == {len(self.dataframe)} {self.most_unique.loc[0,'# Non-null'] == len(self.dataframe)}")
+    # if self.most_unique.loc[0,'# Non-null'] == len(self.dataframe):
+    #   self.most_unique = self.most_unique[[self.most_unique.index[0]]]
       
     log('suggestion for values', self.metadata.sort_values(['# Unique', 'Type'], ascending = [False, True]))
     # get least unique
