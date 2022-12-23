@@ -137,8 +137,11 @@ class Table():
                                           ordered=True)
     # get most unique
     self.most_unique = self.metadata.sort_values(['# Unique', 'Type'], ascending = [False, True])
-
-    log('----\nsuggestion for values\n----\n', self.metadata.sort_values(['# Unique', 'Type'], ascending = [False, True]))
+    log(f"{self.most_unique.loc[0,'# Non-null']} == {len(self.dataframe)} {self.most_unique.loc[0,'# Non-null'] == len(self.dataframe)}")
+    if self.most_unique.loc[0,'# Non-null'] == len(self.dataframe):
+      self.most_unique = self.most_unique[[self.most_unique.index[0]]]
+      
+    log('suggestion for values', self.metadata.sort_values(['# Unique', 'Type'], ascending = [False, True]))
     # get least unique
     self.least_unique = self.metadata.sort_values(['# Unique', 'Type'], ascending = [True, True])
     self.least_unique['area_of_attention'] = self.least_unique[['# Unique']].cumprod()

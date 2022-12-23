@@ -22,6 +22,7 @@
         - numpy
         - pandas
         - panel==0.13.1a2
+        - pdf2image
         - paths:
             - ./main.py
     </py-env>
@@ -40,78 +41,32 @@
         <div class="row overflow-hidden" id="content">
             <div class="col mh-100 float-left" id="main">
                 <div id="fileinput"></div>
-                
-                <div id="questions"></div>
-                <div id="table"></div>
-                <div id="gstack"></div>
             </div>
         </div>
     </div>
     <py-script>
-        from main import *
+        from pdf2image import convert_from_bytes
         import asyncio
         import panel as pn
-        import pandas as pd
         from panel.io.pyodide import show
-        from panel import GridSpec
 
-
-        #pn.extension('gridstack')
-
-        file_input = pn.widgets.FileInput(accept='.csv', width=180)
+        file_input = pn.widgets.FileInput(accept='.pdf,.csv', width=180)
         button_upload = pn.widgets.Button(name='Upload', button_type='primary', width=100)
         row = pn.Row(file_input, button_upload, height=75)
         
-        #table = pn.widgets.Tabulator(pagination='remote', page_size=10)
-        gspec = pn.GridSpec(sizing_mode='stretch_both', max_height=800)
-
-        document.getElementById('table').style.display = 'none'
-        multi_select = pn.widgets.MultiSelect(name='MultiSelect', value=[],
-        options=[], size=20)
         def process_file(event):
             if file_input.value is not None:
-                mytable = Table(io.BytesIO(file_input.value))
-                choices = {}
-                for y in mytable.most_unique.index:
-                    for x in mytable.least_unique.index:
-                        if x != y:
-                            choices[f'Count number of {x} by {y}']={'index':x, 'value':y}
-                
-                multi_select.options = [x for x in choices.keys()]
-                
-                gspec.objects = {}
-                #gspec = pn.GridSpec(sizing_mode='stretch_both', max_height=800)
-                for idx,values in enumerate(multi_select.value):
-                    values_column = choices.get(values, {}).get('value')
-                    index_column = choices.get(values, {}).get('index')
-                    df = mytable.dataframe.pivot_table(values=values_column,
-                                                        index=index_column,
-                                                        aggfunc='count')
-                    tabulator_formatters = {
-                        'int': {'type': 'progress'},
-                        'bool': {'type': 'tickCross'}
-                    }
-                    print(df.dtypes)
-                    gspec[:,idx] = pn.widgets.Tabulator(df,
-                                                        pagination='remote',
-                                                        page_size=10,
-                                                        formatters=tabulator_formatters)
-                    
-                #document.getElementById('table').style.display = 'block'
+                pages = convert_from_bytes(file_input.value)
+                print(pages)
         
 
             
         button_upload.on_click(process_file)
         print('--------')
-        multi_select.param.watch(process_file, 'value')
-        
         file_input.param.watch(process_file, 'value')
 
-        row2 = pn.Row(multi_select)
+        
         await show(row, 'fileinput')
-        #await show(table, 'table')
-        await show(gspec, 'gstack')
-        await show(row2, 'questions')
     </py-script>
 </body>
 
